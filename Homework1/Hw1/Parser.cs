@@ -13,10 +13,10 @@ public static class Parser
         if (!double.TryParse(args[0], out val1) || !double.TryParse(args[2], out val2))
             throw new ArgumentException("One of the values is wrong");
         
-        if (ParseOperation(args[2]) == CalculatorOperation.Undefined)
+        if (ParseOperation(args[1]) == CalculatorOperation.Undefined)
             throw new InvalidOperationException("Operation is undefined");
         
-        operation = ParseOperation(args[2]);
+        operation = ParseOperation(args[1]);
     }
 
     private static bool IsArgLengthSupported(string[] args) => args.Length == 3;
