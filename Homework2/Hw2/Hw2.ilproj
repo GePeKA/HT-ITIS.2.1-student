@@ -6,4 +6,8 @@
         <MicrosoftNetCoreIlasmPackageVersion>6.0.0</MicrosoftNetCoreIlasmPackageVersion>
         <ProduceReferenceAssembly>..\Hw2\obj\Debug\net6.0\</ProduceReferenceAssembly>
     </PropertyGroup>
+
+	<ItemGroup>
+		<Content Include="**\*.il" />
+	</ItemGroup>
 </Project>
