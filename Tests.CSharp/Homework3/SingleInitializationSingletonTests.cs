@@ -36,6 +36,7 @@ public class SingleInitializationSingletonTests
     [Homework(Homeworks.HomeWork3)]
     public void DoubleInitializationAttemptThrowsException()
     {
+        SingleInitializationSingleton.Reset();
         SingleInitializationSingleton.Initialize(2);
         Assert.Throws<InvalidOperationException>(() => { SingleInitializationSingleton.Initialize(3); });
     }
