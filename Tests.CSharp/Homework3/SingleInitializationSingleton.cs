@@ -23,8 +23,11 @@ public class SingleInitializationSingleton
     {
         get
         {
-            _isInitialized = true;
-            return _instance.Value;
+            lock (Locker)
+            {
+                _isInitialized = true;
+                return _instance.Value;
+            }
         }
     }
 
@@ -39,13 +42,19 @@ public class SingleInitializationSingleton
 
     public static void Initialize(int delay)
     {
-        if (_isInitialized)
-            throw new InvalidOperationException("Parameters have already been initialized");
-        
-        lock (Locker)
+        if (!_isInitialized)
         {
-            _instance = new Lazy<SingleInitializationSingleton>(() => new SingleInitializationSingleton(delay));
-            _isInitialized = true;
+            lock (Locker)
+            {
+                if (_isInitialized)
+                    throw new InvalidOperationException("Parameters were initialized in another thread");
+
+                _instance = new Lazy<SingleInitializationSingleton>(() => new SingleInitializationSingleton(delay));
+                _isInitialized = true;
+            }
         }
+        
+        else
+            throw new InvalidOperationException("Parameters have already been initialized");
     }
 }
