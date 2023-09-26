@@ -8,7 +8,7 @@ public class SingleInitializationSingleton
 
     private static volatile bool _isInitialized = false;
 
-    private static SingleInitializationSingleton? _instance = null;
+    private static Lazy<SingleInitializationSingleton> _instance = new(() => new SingleInitializationSingleton());
 
     private SingleInitializationSingleton(int delay = DefaultDelay)
     {
@@ -23,15 +23,8 @@ public class SingleInitializationSingleton
     {
         get
         {
-            lock (Locker)
-            {
-                if (!_isInitialized)
-                {
-                    _instance = new SingleInitializationSingleton();
-                    _isInitialized = true;
-                }
-                return _instance!;
-            }
+            _isInitialized = true;
+            return _instance.Value;
         }
     }
 
@@ -40,24 +33,19 @@ public class SingleInitializationSingleton
         lock (Locker)
         {
             _isInitialized = false;
-            _instance = null;
+            _instance = new Lazy<SingleInitializationSingleton>(() => new SingleInitializationSingleton());
         }
     }
 
     public static void Initialize(int delay)
     {
-        if (!_isInitialized)
+        if (_isInitialized)
+            throw new InvalidOperationException("Parameters have already been initialized");
+        
+        lock (Locker)
         {
-            lock (Locker)
-            {
-                if (_isInitialized)
-                    throw new InvalidOperationException("Instance has already been initialized in another thread");
-                
-                _isInitialized = true;
-                _instance = new SingleInitializationSingleton(delay);
-            }
+            _instance = new Lazy<SingleInitializationSingleton>(() => new SingleInitializationSingleton(delay));
+            _isInitialized = true;
         }
-        else
-            throw new InvalidOperationException("Double initialization is prohibited");
     }
 }
