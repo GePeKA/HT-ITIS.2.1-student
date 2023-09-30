@@ -45,7 +45,7 @@ let ``Incorrect operations throw ArgumentException``() =
 [<Homework(Homeworks.HomeWork4)>]
 let ``Incorrect argument count throws ArgumentException``() =
     // arrange
-    let args = [|"3"; "."; "4"; "5"|]
+    let args = [|"3"; "*"; "4"; "5"|]
     
     // act/assert
     Assert.Throws<ArgumentException>(fun () -> parseCalcArguments args |> ignore)
