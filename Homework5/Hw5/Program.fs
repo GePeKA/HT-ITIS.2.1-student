@@ -7,9 +7,9 @@ let parsed = parseCalcArguments arguments
 
 let result = 
     match parsed with
-    |Ok resultOk -> 
+    | Ok resultOk ->
         match resultOk with
-        |val1, operation, val2 -> calculate val1 operation val2
-    |Error e -> raise(InvalidOperationException("Parse was not successful"))
+        | val1, operation, val2 -> calculate val1 operation val2 |> string
+    | Error e -> "Parse was not Successful"
 
-printf "%f" result
+printf "%s" result
