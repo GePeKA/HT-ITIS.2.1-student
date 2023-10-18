@@ -83,7 +83,7 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory<App.Startup>
     [Homework(Homeworks.HomeWork6)]
     public async Task TestParserDividingByZero()
     {
-        await RunTest("15.6", "0", "Divide", "DivideByZero", HttpStatusCode.OK, true);
+        await RunTest("15.6", "0", "Divide", "DivideByZero", HttpStatusCode.BadRequest, true);
     }
 
     private async Task RunTest(string value1, string value2, string operation, string expectedValueOrError,
@@ -99,7 +99,7 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory<App.Startup>
 
         // assert
         Assert.True(response.StatusCode == statusCode);
-        if (statusCode == HttpStatusCode.OK && !isDividingByZero)
+        if (statusCode == HttpStatusCode.OK)
             Assert.True(Math.Abs(decimal.Parse(expectedValueOrError, CultureInfo.InvariantCulture) -
                                  decimal.Parse(result, CultureInfo.InvariantCulture)) < Epsilon);
         else
