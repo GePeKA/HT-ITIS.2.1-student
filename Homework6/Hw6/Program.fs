@@ -18,7 +18,9 @@ let calculatorHandler: HttpHandler =
         
         let result: Result<string, string> = 
             match (parseCalcArguments query1 oper query2) with
-            | Ok(val1, op, val2) -> Ok ((calculate val1 op val2) |> string)
+            | Ok(val1, op, val2) -> match (calculate val1 op val2) with
+                                    | Ok result -> Ok (result |> string)
+                                    | Error error -> Error error
             | Error DivideByZero -> Ok (DivideByZero)
             | Error error -> Error error
 
