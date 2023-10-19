@@ -5,7 +5,9 @@ open Hw6.MaybeBuilder
 open System
 open System.Globalization
 
-[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage>]
+[<Literal>] 
+let DivideByZero = "DivideByZero"
+
 let inline isOperationSupported (arg1, operation, arg2) =
     match operation with
     | Plus | Minus | Multiply | Divide -> Ok (arg1, operation, arg2)
@@ -20,11 +22,9 @@ let parseArgs (value1:string, operation:string, value2:string) =
     | (true, false) -> Error $"Could not parse value '{value2}'"
     | _ -> Error $"Could not parse value '{value1}'"
 
-[<System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage>]
 let inline isDividingByZero (arg1, operation, arg2) =
-    let potentialZero = arg2 |> float
-    match (operation, potentialZero) with
-    | (Divide, 0.0) -> Error "DivideByZero"
+    match (operation, arg2) with
+    | (Divide, 0M) -> Error DivideByZero
     | _ -> Ok (arg1, operation, arg2)
 
 let parseCalcArguments (val1:string) (operation:string) (val2:string) =
