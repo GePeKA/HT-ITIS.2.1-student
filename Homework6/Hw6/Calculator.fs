@@ -12,7 +12,7 @@ let Multiply = "Multiply"
 [<Literal>] 
 let Divide = "Divide"
 
-let inline calculate value1 operation value2 =
+let calculate (value1:decimal) (operation:string) (value2:decimal) =
     match operation with
     | Plus -> value1 + value2
     | Minus -> value1 - value2

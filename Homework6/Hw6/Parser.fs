@@ -8,7 +8,7 @@ open System.Globalization
 [<Literal>] 
 let DivideByZero = "DivideByZero"
 
-let inline isOperationSupported (arg1, operation, arg2) =
+let isOperationSupported (arg1, operation, arg2) =
     match operation with
     | Plus | Minus | Multiply | Divide -> Ok (arg1, operation, arg2)
     | _ -> Error $"Could not parse value '{operation}'"
@@ -22,7 +22,7 @@ let parseArgs (value1:string, operation:string, value2:string) =
     | (true, false) -> Error $"Could not parse value '{value2}'"
     | _ -> Error $"Could not parse value '{value1}'"
 
-let inline isDividingByZero (arg1, operation, arg2) =
+let isDividingByZero (arg1, operation, arg2) =
     match (operation, arg2) with
     | (Divide, 0M) -> Error DivideByZero
     | _ -> Ok (arg1, operation, arg2)
