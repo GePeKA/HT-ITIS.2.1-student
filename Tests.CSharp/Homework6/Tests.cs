@@ -86,6 +86,38 @@ public class BasicTests : IClassFixture<CustomWebApplicationFactory<App.Startup>
         await RunTest("15.6", "0", "Divide", "DivideByZero", HttpStatusCode.OK, true);
     }
 
+	[HomeworkTheory(Homeworks.HomeWork6)]
+	[InlineData(15.6, 5.6, Calculator.Plus, 21.2)]
+	[InlineData(15.6, 5.6, Calculator.Minus, 10)]
+	[InlineData(15.6, 5.6, Calculator.Multiply, 87.36)]
+	[InlineData(15.6, 5.6, Calculator.Divide, 2.7857)]
+	public void TestCalculatorCorrectOperations(decimal value1, decimal value2, string operation, decimal expectedValue)
+    {
+        var actualFResult = Calculator.calculate(value1, operation, value2);
+
+        Assert.True(actualFResult.IsOk);
+
+        var actualNumber = actualFResult.ResultValue;
+
+        Assert.True(Math.Abs(actualNumber - expectedValue) < Epsilon);
+	}
+
+	[HomeworkTheory(Homeworks.HomeWork6)]
+	[InlineData(15.6, 5.6, "dase")]
+	[InlineData(15.6, 5.6, ".")]
+	[InlineData(15.6, 5.6, "52")]
+	[InlineData(15.6, 5.6, "^&*!")]
+	public void TestCalculatorWrongOperations(decimal value1, decimal value2, string operation)
+    {
+        var actualFResult = Calculator.calculate(value1, operation, value2);
+
+        Assert.True(actualFResult.IsError);
+
+        var errorMessage = actualFResult.ErrorValue;
+
+        Assert.Contains(operation, errorMessage);
+    }
+
     private async Task RunTest(string value1, string value2, string operation, string expectedValueOrError,
         HttpStatusCode statusCode, bool isDividingByZero = false)
     {
