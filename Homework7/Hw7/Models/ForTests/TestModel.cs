@@ -19,10 +19,11 @@ public class TestModel : BaseModel
     [Required(ErrorMessage = Messages.RequiredMessage)]
     [Display(Name = "Отчество")]
     public override string? MiddleName { get; set; }
-    
+
     //without [Display(Name = "Возраст")]
+    [Required(ErrorMessage = $"Age {Messages.RangeMessage}")]
     [Range(10, 100, ErrorMessage = $"Age {Messages.RangeMessage}")]
-    public override int Age { get; set; }
+    public override int? Age { get; set; }
     
     [Display(Name = "Пол")]
     public override Sex Sex { get; set; }
