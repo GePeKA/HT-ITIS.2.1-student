@@ -8,7 +8,7 @@ public class HomeController : Controller
     [HttpGet]
     public IActionResult UserProfile()
     {
-        return View();
+        return View(new UserProfile());
     }
 
     [HttpPost]
