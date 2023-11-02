@@ -24,7 +24,7 @@ public static class TestHelper
     {
         try
         {
-            return GetLabelForProperty(html, propertyName).SelectNodes("./span").First().InnerHtml.RemoveNewLine();
+            return GetLabelForProperty(html, propertyName).SelectNodes("../span").First().InnerHtml.RemoveNewLine();
         }
         catch (ArgumentNullException)
         {
