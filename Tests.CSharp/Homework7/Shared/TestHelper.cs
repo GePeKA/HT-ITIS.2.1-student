@@ -34,7 +34,7 @@ public static class TestHelper
 
     public static string GetPropertyNameFromLabel(string html, string propertyName)
     {
-        return GetLabelForProperty(html, propertyName).InnerHtml.RemoveNewLine();
+        return GetLabelForProperty(html, propertyName).InnerText.RemoveNewLine();
     }
 
     public static async Task<string> SendForm(HttpClient client, string url, BaseModel model)

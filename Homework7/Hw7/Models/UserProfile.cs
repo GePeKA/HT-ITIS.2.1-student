@@ -26,10 +26,11 @@ public class UserProfile : BaseModel
     [MaxLength(30, ErrorMessage = $"Middle Name {Messages.MaxLengthMessage}")]
     [Display(Name = "Отчество")]
     public override string? MiddleName { get; set; }
-    
+
+    [Required(ErrorMessage = $"Age {Messages.RangeMessage}")]
     [Range(10, 100, ErrorMessage = $"Age {Messages.RangeMessage}")]
     [Display(Name = "Возраст")]
-    public override int Age { get; set; }
+    public override int? Age { get; set; }
         
     [Display(Name = "Пол")]
     public override Sex Sex { get; set; }

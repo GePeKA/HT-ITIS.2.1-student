@@ -13,16 +13,17 @@ public class TestModel : BaseModel
     //without [Required(ErrorMessage = Messages.RequiredMessage)]
     [MaxLength(30, ErrorMessage = $"Last Name {Messages.MaxLengthMessage}")]
     [Display(Name = "Фамилия")]
-    public override string LastName { get; set; } = null!;
+    public override string? LastName { get; set; }
 
     //without [MaxLength(30, ErrorMessage = $"Middle Name {Messages.MaxLengthMessage}")]
     [Required(ErrorMessage = Messages.RequiredMessage)]
     [Display(Name = "Отчество")]
     public override string? MiddleName { get; set; }
-    
+
     //without [Display(Name = "Возраст")]
+    [Required(ErrorMessage = $"Age {Messages.RangeMessage}")]
     [Range(10, 100, ErrorMessage = $"Age {Messages.RangeMessage}")]
-    public override int Age { get; set; }
+    public override int? Age { get; set; }
     
     [Display(Name = "Пол")]
     public override Sex Sex { get; set; }

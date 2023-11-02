@@ -42,7 +42,7 @@ public class TestFormTests : IClassFixture<WebApplicationFactory<Hw7.Program>>
         string expected)
     {
         //arrange
-        var model = new BaseModel();
+        var model = new TestModel();
         var response = await TestHelper.SendForm(_client, _url, model);
 
         //act
@@ -61,7 +61,7 @@ public class TestFormTests : IClassFixture<WebApplicationFactory<Hw7.Program>>
         string expected)
     {
         //arrange
-        var model = new BaseModel
+        var model = new TestModel
             { FirstName = TestHelper.LongString, LastName = TestHelper.LongString, MiddleName = TestHelper.LongString };
         var response = await TestHelper.SendForm(_client, _url, model);
 
