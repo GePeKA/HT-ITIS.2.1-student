@@ -37,8 +37,12 @@ public static class HtmlHelperExtensions
 
     private static IHtmlContent CreateLabel(PropertyInfo property)
     {
-        var labelText = property.GetCustomAttribute<DisplayAttribute>()?.Name
-            ?? property?.Name.SplitByCamelCase();
+        string labelText;
+
+        if (property.GetCustomAttribute<DisplayAttribute>() != null)
+            labelText = property.GetCustomAttribute<DisplayAttribute>()!.Name!;
+        else
+            labelText = property.Name.SplitByCamelCase();
 
         return new HtmlContentBuilder().AppendHtmlLine($"<label for=\"{property!.Name}\">{labelText}</label>: ");
     }
@@ -96,7 +100,7 @@ public static class HtmlHelperExtensions
         {
             if (model!= null && !attribute.IsValid(property.GetValue(model)))
             {
-                builder.AppendHtml($"{attribute.ErrorMessage}");
+                builder.AppendHtml(attribute!.ErrorMessage);
                 break;
             }
         }
