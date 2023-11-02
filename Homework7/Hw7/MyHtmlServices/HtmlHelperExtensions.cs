@@ -1,5 +1,4 @@
 using Hw7.Models;
-using Hw7.Models.ForTests;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
@@ -10,39 +9,99 @@ namespace Hw7.MyHtmlServices;
 
 public static class HtmlHelperExtensions
 {
-    public static IHtmlContent MyEditorForModel(this IHtmlHelper helper, BaseModel model)
+    public static IHtmlContent MyEditorForModel(this IHtmlHelper helper)
     {
         var builder = new HtmlContentBuilder();
 
-        AddTextBoxForProperty(helper, model, builder, "FirstName");
-        AddTextBoxForProperty(helper, model, builder, "LastName");
-        AddTextBoxForProperty(helper, model, builder, "MiddleName");
-        AddTextBoxForProperty(helper,  model, builder, "Age", "number");
+        var modelType = helper.ViewData.ModelExplorer.ModelType;
+        var model = helper.ViewData.ModelExplorer.Model;
 
-        builder.AppendHtml(helper.Label("Sex",
-            model.GetType().GetProperty("Sex")?.GetCustomAttribute<DisplayAttribute>()?.Name));
-
-        builder.AppendLine(helper.DropDownList("Sex", helper.GetEnumSelectList<Sex>()));
+        foreach (var property in modelType.GetProperties())
+        {
+            builder.AppendLine(EditProperty(property, model));
+        }
 
         return builder;
     }
 
-    [ExcludeFromCodeCoverage]
-    private static HtmlContentBuilder AddTextBoxForProperty(IHtmlHelper helper, BaseModel model,
-        HtmlContentBuilder builder, string propertyName, string type = "text")
+    private static IHtmlContent EditProperty(PropertyInfo property, object? model)
     {
-        var labelText = model.GetType().GetProperty(propertyName)?.GetCustomAttribute<DisplayAttribute>()?.Name
-            ?? typeof(BaseModel).GetProperty(propertyName)?.Name.SplitByCamelCase();
+        var builder = new HtmlContentBuilder().AppendHtmlLine("<div>");
 
-        builder.AppendHtmlLine($"<label for=\"{propertyName}\">{labelText}");
+        builder.AppendLine(CreateLabel(property))
+            .AppendLine(AddInput(property, model))
+            .AppendLine(AddValidationMessage(property, model)); 
 
-        builder.AppendLine(helper.TextBox(propertyName, "", new { @type = type }));
-        builder.AppendLine(helper.ValidationMessage(propertyName, new { @class = "text-danger" }));
+        return builder.AppendHtmlLine("</div> <br>");
+    }
 
-        builder.AppendHtmlLine("</label>");
-        builder.AppendHtmlLine("<br> <br>");
+    private static IHtmlContent CreateLabel(PropertyInfo property)
+    {
+        var labelText = property.GetCustomAttribute<DisplayAttribute>()?.Name
+            ?? property?.Name.SplitByCamelCase();
+
+        return new HtmlContentBuilder().AppendHtmlLine($"<label for=\"{property!.Name}\">{labelText}</label>: ");
+    }
+
+    private static IHtmlContent AddInput(PropertyInfo property, object? model)
+    {
+        var builder = new HtmlContentBuilder();
+        var propertyType = property.PropertyType;
+        var value = model == null ? "" : property.GetValue(model)?.ToString();
+
+        if (propertyType == typeof(int?))
+            builder.AppendHtmlLine(CreateInputField("number", property.Name, value));
+        else if (propertyType == typeof(string))
+            builder.AppendHtmlLine(CreateInputField("text", property.Name, value));
+        else if (propertyType.IsEnum)
+            builder.AppendLine(CreateSelectForEnum(property, model));
 
         return builder;
+    }
+
+    private static string CreateInputField(string inputType, string propertyName, string value)
+    {
+        return $"<input type=\"{inputType}\" id=\"{propertyName}\" name=\"{propertyName}\" value=\"{value}\">";
+    }
+
+    private static IHtmlContent CreateSelectForEnum(PropertyInfo property, object? model)
+    {
+        var builder = new HtmlContentBuilder();
+        var enumType = property.PropertyType;
+
+        var selected = model != null ? property.GetValue(model) : null;
+
+        builder.AppendHtmlLine($"<select name=\"{property.Name}\" id=\"{property.Name}\">");
+
+        foreach(var field in Enum.GetValues(enumType))
+        {
+            var sel = "";
+            if (selected != null && selected.ToString() == field.ToString())
+                sel = "selected";
+
+            builder.AppendHtmlLine($"<option value=\"{field}\" {sel}>{field}</option>");
+        }
+
+        return builder.AppendHtmlLine("</select>");
+    }
+
+    private static IHtmlContent AddValidationMessage(PropertyInfo property, object? model)
+    {
+        var builder = new HtmlContentBuilder();
+
+        builder.AppendHtmlLine("<span class=\"text-danger\">");
+        var validationAttributes = property.GetCustomAttributes<ValidationAttribute>(true);
+
+        foreach (var attribute in validationAttributes)
+        {
+            if (model!= null && !attribute.IsValid(property.GetValue(model)))
+            {
+                builder.AppendHtml($"{attribute.ErrorMessage}");
+                break;
+            }
+        }
+
+        return builder.AppendHtmlLine("</span>");
     }
 
     [ExcludeFromCodeCoverage]

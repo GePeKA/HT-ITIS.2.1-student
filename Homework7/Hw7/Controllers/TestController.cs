@@ -8,7 +8,7 @@ namespace Hw7.Controllers
         [HttpGet]
         public IActionResult TestModel()
         {
-            return View(new TestModel());
+            return View();
         }
 
         [HttpPost]
