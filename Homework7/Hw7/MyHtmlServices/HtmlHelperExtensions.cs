@@ -31,14 +31,16 @@ public static class HtmlHelperExtensions
     private static HtmlContentBuilder AddTextBoxForProperty(IHtmlHelper helper, BaseModel model,
         HtmlContentBuilder builder, string propertyName, string type = "text")
     {
-        builder.AppendHtml(helper.Label(propertyName,
-            model.GetType().GetProperty(propertyName)?.GetCustomAttribute<DisplayAttribute>()?.Name
-            ?? typeof(BaseModel).GetProperty(propertyName)?.Name.SplitByCamelCase()));
+        var labelText = model.GetType().GetProperty(propertyName)?.GetCustomAttribute<DisplayAttribute>()?.Name
+            ?? typeof(BaseModel).GetProperty(propertyName)?.Name.SplitByCamelCase();
 
-        builder.Append(": ");
-        builder.AppendHtml(helper.TextBox(propertyName, "", new { @type = type }));
-        builder.AppendHtml(helper.ValidationMessage(propertyName, new { @class = "text-danger" }));
-        builder.AppendHtml("<br> <br>");
+        builder.AppendHtmlLine($"<label for=\"{propertyName}\">{labelText}");
+
+        builder.AppendLine(helper.TextBox(propertyName, "", new { @type = type }));
+        builder.AppendLine(helper.ValidationMessage(propertyName, new { @class = "text-danger" }));
+
+        builder.AppendHtmlLine("</label>");
+        builder.AppendHtmlLine("<br> <br>");
 
         return builder;
     }
