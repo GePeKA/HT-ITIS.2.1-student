@@ -13,7 +13,7 @@ public class TestModel : BaseModel
     //without [Required(ErrorMessage = Messages.RequiredMessage)]
     [MaxLength(30, ErrorMessage = $"Last Name {Messages.MaxLengthMessage}")]
     [Display(Name = "Фамилия")]
-    public override string LastName { get; set; } = null!;
+    public override string? LastName { get; set; };
 
     //without [MaxLength(30, ErrorMessage = $"Middle Name {Messages.MaxLengthMessage}")]
     [Required(ErrorMessage = Messages.RequiredMessage)]
