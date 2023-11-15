@@ -7,6 +7,8 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddMathCalculator();
 
+builder.Services.AddExpressionParser();
+
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
