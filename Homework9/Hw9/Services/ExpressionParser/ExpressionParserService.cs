@@ -11,6 +11,7 @@ namespace Hw9.Services.ExpressionParser
         public const string Divide = "/";
         public const string OpenBracket = "(";
         public const string CloseBracket = ")";
+        public const string UnaryMinus = "_";
 
         public bool CheckExpressionString(string? expression, out string errorMessage)
         {
@@ -134,9 +135,10 @@ namespace Hw9.Services.ExpressionParser
         {
             var resultQueue = new Queue<string>();
 
-            var operators = new List<string>() { Plus, Minus, Multiply, Divide, OpenBracket };
+            var operators = new List<string>() { Plus, Minus, Multiply, Divide, OpenBracket, UnaryMinus };
 
             var tokens = expression.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            HandleUnaryMinuses(tokens);
 
             var operatorStack = new Stack<string>();
 
@@ -144,7 +146,7 @@ namespace Hw9.Services.ExpressionParser
             { 
                 if (operators.Contains(token))
                 {
-                    while (operatorStack.Count > 0 && HasHigherPriority(operatorStack.Peek(), token))
+                    while (operatorStack.Count > 0 && HasHigherOrEqualPriority(operatorStack.Peek(), token))
                     {
                         resultQueue.Enqueue(operatorStack.Pop());
                     }
@@ -176,9 +178,15 @@ namespace Hw9.Services.ExpressionParser
 
             return resultQueue;
 
-            bool HasHigherPriority(string op1, string op2) => 
-                new List<string>() { Multiply, Divide }.Contains(op1)
-                    && new List<string>() { Plus, Minus }.Contains(op2);
+            bool HasHigherOrEqualPriority(string op1, string op2)
+            {
+                var higherPriorityOpers = new List<string>() { Multiply, Divide, UnaryMinus };
+                var lowerPriorityOpers = new List<string>() { Plus, Minus };
+
+                return higherPriorityOpers.Contains(op1) && higherPriorityOpers.Contains(op2)
+                    || lowerPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2)
+                    || higherPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2);
+            }
         }
 
         //Postfix Calculator algorithm
@@ -210,6 +218,11 @@ namespace Hw9.Services.ExpressionParser
                             expression = Expression.Subtract(subtracted, subtract);
                             break;
 
+                        case (UnaryMinus):
+                            var unar = exprStack.Pop();
+                            expression = Expression.Subtract(Expression.Constant(0.0, typeof(double)), unar);
+                            break;
+
                         case (Multiply):
                             expression = Expression.Multiply(exprStack.Pop(), exprStack.Pop());
                             break;
@@ -229,7 +242,7 @@ namespace Hw9.Services.ExpressionParser
                             else if (rightDivide is BinaryExpression)
                             {
                                 var expr = Expression.Lambda<Func<double>>((BinaryExpression)rightDivide);
-                                if (expr.Compile()() == 0)
+                                if (expr.Compile().Invoke() == 0)
                                     return Expression.Throw(Expression.Constant
                                         (new DivideByZeroException(DivisionByZero)));
                             }
@@ -246,6 +259,17 @@ namespace Hw9.Services.ExpressionParser
             }
 
             return exprStack.Pop();
+        }
+
+        private static void HandleUnaryMinuses(string[] tokens)
+        {
+            for (int i = 0; i < tokens.Length; i++)
+            {
+                if (tokens[i] == Minus && (i == 0 || tokens[i - 1] == OpenBracket))
+                {
+                    tokens[i] = UnaryMinus;
+                }
+            }
         }
     }
 }
