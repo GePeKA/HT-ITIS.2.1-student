@@ -1,3 +1,5 @@
+using Hw9.Services.ExpressionCalculator;
+using Hw9.Services.ExpressionParser;
 using Hw9.Services.MathCalculator;
 
 namespace Hw9.Configuration;
@@ -8,5 +10,17 @@ public static class ServiceCollectionExtensions
     {
         return services
             .AddTransient<IMathCalculatorService, MathCalculatorService>();
+    }
+
+    public static IServiceCollection AddExpressionParser(this IServiceCollection services) 
+    { 
+        return services
+            .AddTransient<IExpressionParserService, ExpressionParserService>();
+    }
+
+    public static IServiceCollection AddExpressionCalculator(this IServiceCollection services) 
+    { 
+        return services
+            .AddTransient<IExpressionCalculator, ExpressionCalculator>();
     }
 }
