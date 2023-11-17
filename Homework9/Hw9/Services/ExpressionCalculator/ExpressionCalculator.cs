@@ -23,10 +23,7 @@ namespace Hw9.Services.ExpressionCalculator
                     await Task.WhenAll(beforeList.Select(b => lazy[b].Value));
                     await Task.Yield();
 
-                    if (expr is ConstantExpression constant)
-                        await CalculateConstantAsync(constant);
-
-                    else if (expr is BinaryExpression binary)
+                    if (expr is BinaryExpression binary)
                         await CalculateBinaryAsync(binary);
                 });
             }
@@ -36,14 +33,14 @@ namespace Hw9.Services.ExpressionCalculator
         }
 
         [ExcludeFromCodeCoverage]
-        private async Task<double> CalculateBinaryAsync(BinaryExpression expression)
+        private async Task<double> CalculateBinaryAsync(BinaryExpression expr)
         {
             await Task.Delay(1000);
 
-            var left = _results[expression.Left];
-            var right = _results[expression.Right];
+            var left = expr.Left is ConstantExpression const1? (double)const1.Value! : _results[expr.Left];
+            var right = expr.Right is ConstantExpression const2 ? (double)const2.Value! : _results[expr.Right];
 
-            var result = expression.NodeType switch
+            var result = expr.NodeType switch
             {
                 ExpressionType.Add => left + right,
                 ExpressionType.Subtract => left - right,
@@ -52,17 +49,8 @@ namespace Hw9.Services.ExpressionCalculator
                 _ => throw new InvalidOperationException()
             };
 
-            _results[expression] = result;
-            return _results[expression];
-        }
-
-        private async Task<double> CalculateConstantAsync(ConstantExpression constant)
-        {
-            return await Task.Run(() =>
-            {
-                _results[constant] = (double)constant.Value!;
-                return _results[constant];
-            });
+            _results[expr] = result;
+            return _results[expr];
         }
     }
 }

@@ -12,16 +12,20 @@ namespace Hw9.Services.ExpressionCalculator
             return _expressionsMap;
         }
 
-        protected override Expression VisitConstant(ConstantExpression node)
-        {
-            _expressionsMap.Add(node, new List<Expression>());
-
-            return node;
-        }
-
         protected override Expression VisitBinary(BinaryExpression binary)
         {
-            _expressionsMap.Add(binary, new List<Expression>() { Visit(binary.Left), Visit(binary.Right) });
+            var left = Visit(binary.Left);
+            var right = Visit(binary.Right);
+
+            var executeBeforeList = new List<Expression>();
+
+            if (left is BinaryExpression leftBinary)
+                executeBeforeList.Add(leftBinary);
+            
+            if (right is BinaryExpression rightBinary)
+                executeBeforeList.Add(rightBinary);
+
+            _expressionsMap.Add(binary, executeBeforeList);
 
             return binary;
         }
