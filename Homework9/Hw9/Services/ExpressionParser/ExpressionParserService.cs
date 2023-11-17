@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using static Hw9.ErrorMessages.MathErrorMessager;
 
 namespace Hw9.Services.ExpressionParser
@@ -88,6 +89,7 @@ namespace Hw9.Services.ExpressionParser
         }
 
         //Postfix Calculator algorithm
+        [ExcludeFromCodeCoverage]
         private Expression CalculatePostfix(Queue<string> postfixQueue)
         {
             var exprStack = new Stack<Expression>();
@@ -133,7 +135,7 @@ namespace Hw9.Services.ExpressionParser
                             break;
 
                         default:
-                            throw new Exception("Unexisting operator");
+                            throw new Exception("Unexisting token");
                     };
 
                     exprStack.Push(expression);
@@ -250,6 +252,7 @@ namespace Hw9.Services.ExpressionParser
                 Replace("   ", " ").Replace("  ", " ").Trim();
         }
 
+        [ExcludeFromCodeCoverage]
         private static void ReplaceSingleWithUnaryMinuses(string[] tokens)
         {
             for (int i = 0; i < tokens.Length; i++)

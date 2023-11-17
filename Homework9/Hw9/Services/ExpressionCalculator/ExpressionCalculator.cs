@@ -12,7 +12,7 @@ namespace Hw9.Services.ExpressionCalculator
         {
             var mapper = new ExpressionMapper();
 
-            var executeBefore = mapper.MapExpression(expression);
+            var executeBefore = mapper.ConstructExecuteBeforeMap(expression);
 
             var lazy = new Dictionary<Expression, Lazy<Task>>();
 
@@ -50,7 +50,7 @@ namespace Hw9.Services.ExpressionCalculator
             };
 
             _results[expr] = result;
-            return _results[expr];
+            return result;
         }
     }
 }

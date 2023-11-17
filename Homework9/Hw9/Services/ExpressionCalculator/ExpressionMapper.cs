@@ -6,7 +6,7 @@ namespace Hw9.Services.ExpressionCalculator
     {
         private readonly Dictionary<Expression, List<Expression>> _expressionsMap = new();
 
-        public Dictionary<Expression, List<Expression>> MapExpression(Expression expression)
+        public Dictionary<Expression, List<Expression>> ConstructExecuteBeforeMap(Expression expression)
         {
             Visit(expression);
             return _expressionsMap;
