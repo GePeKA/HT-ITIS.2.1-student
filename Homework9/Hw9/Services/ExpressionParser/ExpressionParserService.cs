@@ -22,7 +22,7 @@ namespace Hw9.Services.ExpressionParser
                 throw new Exception(errorMessage);
             }
 
-            var polish = GetExpressionInPolishNotation(expression);
+            var polish = GetExpressionInPolishNotation(expression!);
             var expr = CalculatePostfix(polish);
 
             return expr;
@@ -128,22 +128,6 @@ namespace Hw9.Services.ExpressionParser
                         case (Divide):
                             var rightDivide = exprStack.Pop();
                             var leftDivide = exprStack.Pop();
-
-                            if (rightDivide is ConstantExpression constant &&
-                                (double)constant!.Value! == 0)
-                            {
-                                return Expression.Throw(Expression.Constant
-                                    (new DivideByZeroException(DivisionByZero)));
-                            }
-
-                            //If right part is BinaryExpression then we can check whether it's = 0 only by compiling and running it
-                            else if (rightDivide is BinaryExpression binary)
-                            {
-                                var expr = Expression.Lambda<Func<double>>(binary);
-                                if (expr.Compile().Invoke() == 0)
-                                    return Expression.Throw(Expression.Constant
-                                        (new DivideByZeroException(DivisionByZero)));
-                            }
 
                             expression = Expression.Divide(leftDivide, rightDivide);
                             break;

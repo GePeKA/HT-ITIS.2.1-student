@@ -2,6 +2,7 @@ using Hw9.Dto;
 using Hw9.Services.ExpressionCalculator;
 using Hw9.Services.ExpressionParser;
 using System.Linq.Expressions;
+using static Hw9.ErrorMessages.MathErrorMessager;
 
 namespace Hw9.Services.MathCalculator;
 
@@ -30,21 +31,16 @@ public class MathCalculatorService : IMathCalculatorService
             return new CalculationMathExpressionResultDto(e.Message);
         }
 
-        if (expr.NodeType == ExpressionType.Throw)
-        {
-            var exceptionMessage = (((expr as UnaryExpression)!.Operand as ConstantExpression)!
-                .Value as Exception)!.Message;
-
-            return new CalculationMathExpressionResultDto(exceptionMessage);
-        }
-
-        else if (expr is ConstantExpression constant)
+        if (expr is ConstantExpression constant)
         {
             return new CalculationMathExpressionResultDto((double)constant.Value!);
         }
 
         var result = await ExpressionCalculator.CalculateExpressionAsync(expr);
 
-        return new CalculationMathExpressionResultDto(result);
+        if (double.IsFinite(result))
+            return new CalculationMathExpressionResultDto(result);
+        else
+            return new CalculationMathExpressionResultDto(DivisionByZero);
     }
 }
