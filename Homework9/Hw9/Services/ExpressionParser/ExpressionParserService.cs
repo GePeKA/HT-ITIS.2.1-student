@@ -15,7 +15,7 @@ namespace Hw9.Services.ExpressionParser
 
         public bool CheckExpressionString(string? expression, out string errorMessage)
         {
-            if (expression == null)
+            if (string.IsNullOrEmpty(expression))
             {
                 errorMessage = EmptyString;
                 return false;
@@ -31,9 +31,7 @@ namespace Hw9.Services.ExpressionParser
 
             foreach (var symb in symbols)
             {
-                double num;
-
-                if (double.TryParse(symb, out num))
+                if (double.TryParse(symb, out var num))
                 {
                     if (previousSymb == Divide && num == 0)
                     {
@@ -231,17 +229,17 @@ namespace Hw9.Services.ExpressionParser
                             var rightDivide = exprStack.Pop();
                             var leftDivide = exprStack.Pop();
 
-                            if (rightDivide is ConstantExpression &&
-                                (double)(rightDivide as ConstantExpression)!.Value! == 0)
+                            if (rightDivide is ConstantExpression constant &&
+                                (double)constant!.Value! == 0)
                             {
                                 return Expression.Throw(Expression.Constant
                                     (new DivideByZeroException(DivisionByZero)));
                             }
 
                             //If right part is BinaryExpression then we can check whether it's = 0 only by compiling and running it
-                            else if (rightDivide is BinaryExpression)
+                            else if (rightDivide is BinaryExpression binary)
                             {
-                                var expr = Expression.Lambda<Func<double>>((BinaryExpression)rightDivide);
+                                var expr = Expression.Lambda<Func<double>>(binary);
                                 if (expr.Compile().Invoke() == 0)
                                     return Expression.Throw(Expression.Constant
                                         (new DivideByZeroException(DivisionByZero)));

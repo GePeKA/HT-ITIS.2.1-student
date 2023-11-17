@@ -1,4 +1,5 @@
 using Hw9.Dto;
+using Hw9.Services.ExpressionCalculator;
 using Hw9.Services.ExpressionParser;
 using System.Linq.Expressions;
 
@@ -7,10 +8,13 @@ namespace Hw9.Services.MathCalculator;
 public class MathCalculatorService : IMathCalculatorService
 {
     public IExpressionParserService ExpressionParser { get; set; }
+    public IExpressionCalculator ExpressionCalculator { get; set; }
 
-    public MathCalculatorService(IExpressionParserService expressionParserService)
+    public MathCalculatorService(IExpressionParserService expressionParserService,
+        IExpressionCalculator expressionCalculator)
     {
         ExpressionParser = expressionParserService;
+        ExpressionCalculator = expressionCalculator;
     }
 
     public async Task<CalculationMathExpressionResultDto> CalculateMathExpressionAsync(string? expression)
@@ -26,14 +30,19 @@ public class MathCalculatorService : IMathCalculatorService
 
         if (expr.NodeType == ExpressionType.Throw)
         {
-            var exception = (((expr as UnaryExpression)!.Operand as ConstantExpression)!
+            var exceptionMessage = (((expr as UnaryExpression)!.Operand as ConstantExpression)!
                 .Value as Exception)!.Message;
 
-            return new CalculationMathExpressionResultDto(exception);
+            return new CalculationMathExpressionResultDto(exceptionMessage);
         }
 
-        var calculateExpression = await Task.Run(() => Expression.Lambda<Func<double>>(expr).Compile());
+        else if (expr is ConstantExpression constant)
+        {
+            return new CalculationMathExpressionResultDto((double)constant.Value!);
+        }
 
-        return new CalculationMathExpressionResultDto(calculateExpression());
+        var result = await ExpressionCalculator.CalculateExpressionAsync(expr);
+
+        return new CalculationMathExpressionResultDto(result);
     }
 }
