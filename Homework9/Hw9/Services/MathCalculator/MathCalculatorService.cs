@@ -19,14 +19,16 @@ public class MathCalculatorService : IMathCalculatorService
 
     public async Task<CalculationMathExpressionResultDto> CalculateMathExpressionAsync(string? expression)
     {
-        expression = ExpressionParser.FormatIntoCorrectExpressionString(expression);
+        Expression expr;
 
-        if (!ExpressionParser.CheckExpressionString(expression, out var errorMessage))
+        try
         {
-            return new CalculationMathExpressionResultDto(errorMessage);
+            expr = ExpressionParser.ConstructExpression(expression!);
         }
-
-        var expr = ExpressionParser.MakeExpression(expression!);
+        catch(Exception e)
+        {
+            return new CalculationMathExpressionResultDto(e.Message);
+        }
 
         if (expr.NodeType == ExpressionType.Throw)
         {

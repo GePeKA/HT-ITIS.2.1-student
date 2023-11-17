@@ -13,7 +13,153 @@ namespace Hw9.Services.ExpressionParser
         public const string CloseBracket = ")";
         public const string UnaryMinus = "_";
 
-        public bool CheckExpressionString(string? expression, out string errorMessage)
+        public Expression ConstructExpression(string? expression)
+        {
+            expression = FormatIntoCorrectExpressionString(expression);
+
+            if (!CheckExpressionString(expression, out var errorMessage))
+            {
+                throw new Exception(errorMessage);
+            }
+
+            var polish = GetExpressionInPolishNotation(expression);
+            var expr = CalculatePostfix(polish);
+
+            return expr;
+        }
+
+        //Using Shunting-yard algorithm
+        private Queue<string> GetExpressionInPolishNotation(string expression)
+        {
+            var resultQueue = new Queue<string>();
+
+            var operators = new List<string>() { Plus, Minus, Multiply, Divide, OpenBracket, UnaryMinus };
+
+            var tokens = expression.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            ReplaceSingleWithUnaryMinuses(tokens);
+
+            var operatorStack = new Stack<string>();
+
+            foreach(var token in tokens) 
+            { 
+                if (operators.Contains(token))
+                {
+                    while (operatorStack.Count > 0 && HasHigherOrEqualPriority(operatorStack.Peek(), token))
+                    {
+                        resultQueue.Enqueue(operatorStack.Pop());
+                    }
+
+                    operatorStack.Push(token);
+                }
+
+                else if (token == CloseBracket)
+                {
+                    var lastOper = operatorStack.Pop();
+
+                    while (lastOper != OpenBracket)
+                    {
+                        resultQueue.Enqueue(lastOper);
+                        lastOper = operatorStack.Pop();
+                    }
+                }
+
+                else if (double.TryParse(token, out _))
+                {
+                    resultQueue.Enqueue(token);
+                }
+            }
+
+            while (operatorStack.Count > 0)
+            {
+                resultQueue.Enqueue(operatorStack.Pop());
+            }
+
+            return resultQueue;
+
+            bool HasHigherOrEqualPriority(string op1, string op2)
+            {
+                var higherPriorityOpers = new List<string>() { Multiply, Divide, UnaryMinus };
+                var lowerPriorityOpers = new List<string>() { Plus, Minus };
+
+                return higherPriorityOpers.Contains(op1) && higherPriorityOpers.Contains(op2)
+                    || lowerPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2)
+                    || higherPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2);
+            }
+        }
+
+        //Postfix Calculator algorithm
+        private Expression CalculatePostfix(Queue<string> postfixQueue)
+        {
+            var exprStack = new Stack<Expression>();
+
+            while (postfixQueue.Count > 0)
+            {
+                var token = postfixQueue.Dequeue();
+
+                if (double.TryParse(token, out var number))
+                {
+                    exprStack.Push(Expression.Constant(number, typeof(double)));
+                }
+
+                else
+                {
+                    Expression expression;
+                    switch (token)
+                    {
+                        case (Plus):
+                            expression = Expression.Add(exprStack.Pop(), exprStack.Pop());
+                            break;
+
+                        case (Minus):
+                            var subtract = exprStack.Pop();
+                            var subtracted = exprStack.Pop();
+                            expression = Expression.Subtract(subtracted, subtract);
+                            break;
+
+                        case (UnaryMinus):
+                            var unar = exprStack.Pop();
+                            expression = Expression.Subtract(Expression.Constant(0.0, typeof(double)), unar);
+                            break;
+
+                        case (Multiply):
+                            expression = Expression.Multiply(exprStack.Pop(), exprStack.Pop());
+                            break;
+
+                        case (Divide):
+                            var rightDivide = exprStack.Pop();
+                            var leftDivide = exprStack.Pop();
+
+                            if (rightDivide is ConstantExpression constant &&
+                                (double)constant!.Value! == 0)
+                            {
+                                return Expression.Throw(Expression.Constant
+                                    (new DivideByZeroException(DivisionByZero)));
+                            }
+
+                            //If right part is BinaryExpression then we can check whether it's = 0 only by compiling and running it
+                            else if (rightDivide is BinaryExpression binary)
+                            {
+                                var expr = Expression.Lambda<Func<double>>(binary);
+                                if (expr.Compile().Invoke() == 0)
+                                    return Expression.Throw(Expression.Constant
+                                        (new DivideByZeroException(DivisionByZero)));
+                            }
+
+                            expression = Expression.Divide(leftDivide, rightDivide);
+                            break;
+
+                        default:
+                            throw new Exception("Unexisting operator");
+                    };
+
+                    exprStack.Push(expression);
+                }
+            }
+
+            return exprStack.Pop();
+        }
+
+        private bool CheckExpressionString(string? expression, out string errorMessage)
         {
             if (string.IsNullOrEmpty(expression))
             {
@@ -88,7 +234,7 @@ namespace Hw9.Services.ExpressionParser
                         errorMessage = UnknownCharacterMessage(chr);
                         return false;
                     }
-                    
+
                     errorMessage = NotNumberMessage(symb);
 
                     return false;
@@ -113,153 +259,14 @@ namespace Hw9.Services.ExpressionParser
             return true;
         }
 
-        public string? FormatIntoCorrectExpressionString(string? expression)
+        private string? FormatIntoCorrectExpressionString(string? expression)
         {
             return expression?.Replace("(", " ( ").Replace(")", " ) ").
                 Replace("/", " / ").Replace("+", " + ").Replace("-", " - ").Replace("*", " * ").
                 Replace("   ", " ").Replace("  ", " ").Trim();
         }
 
-        public Expression MakeExpression(string expression)
-        {
-            var polish = MakePolishNotation(expression);
-            var expr = PostfixCalculate(polish);
-
-            return expr;
-        }
-
-        //Using Shunting-yard algorithm
-        private Queue<string> MakePolishNotation(string expression)
-        {
-            var resultQueue = new Queue<string>();
-
-            var operators = new List<string>() { Plus, Minus, Multiply, Divide, OpenBracket, UnaryMinus };
-
-            var tokens = expression.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-            HandleUnaryMinuses(tokens);
-
-            var operatorStack = new Stack<string>();
-
-            foreach(var token in tokens) 
-            { 
-                if (operators.Contains(token))
-                {
-                    while (operatorStack.Count > 0 && HasHigherOrEqualPriority(operatorStack.Peek(), token))
-                    {
-                        resultQueue.Enqueue(operatorStack.Pop());
-                    }
-
-                    operatorStack.Push(token);
-                }
-
-                else if (token == CloseBracket)
-                {
-                    var lastOper = operatorStack.Pop();
-
-                    while (lastOper != OpenBracket)
-                    {
-                        resultQueue.Enqueue(lastOper);
-                        lastOper = operatorStack.Pop();
-                    }
-                }
-
-                else if (double.TryParse(token, out _))
-                {
-                    resultQueue.Enqueue(token);
-                }
-            }
-
-            while (operatorStack.Count > 0)
-            {
-                resultQueue.Enqueue(operatorStack.Pop());
-            }
-
-            return resultQueue;
-
-            bool HasHigherOrEqualPriority(string op1, string op2)
-            {
-                var higherPriorityOpers = new List<string>() { Multiply, Divide, UnaryMinus };
-                var lowerPriorityOpers = new List<string>() { Plus, Minus };
-
-                return higherPriorityOpers.Contains(op1) && higherPriorityOpers.Contains(op2)
-                    || lowerPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2)
-                    || higherPriorityOpers.Contains(op1) && lowerPriorityOpers.Contains(op2);
-            }
-        }
-
-        //Postfix Calculator algorithm
-        private Expression PostfixCalculate(Queue<string> postfixQueue)
-        {
-            var exprStack = new Stack<Expression>();
-
-            while (postfixQueue.Count > 0)
-            {
-                var token = postfixQueue.Dequeue();
-
-                if (double.TryParse(token, out var number))
-                {
-                    exprStack.Push(Expression.Constant(number, typeof(double)));
-                }
-
-                else
-                {
-                    Expression expression;
-                    switch (token)
-                    {
-                        case (Plus):
-                            expression = Expression.Add(exprStack.Pop(), exprStack.Pop());
-                            break;
-
-                        case (Minus):
-                            var subtract = exprStack.Pop();
-                            var subtracted = exprStack.Pop();
-                            expression = Expression.Subtract(subtracted, subtract);
-                            break;
-
-                        case (UnaryMinus):
-                            var unar = exprStack.Pop();
-                            expression = Expression.Subtract(Expression.Constant(0.0, typeof(double)), unar);
-                            break;
-
-                        case (Multiply):
-                            expression = Expression.Multiply(exprStack.Pop(), exprStack.Pop());
-                            break;
-
-                        case (Divide):
-                            var rightDivide = exprStack.Pop();
-                            var leftDivide = exprStack.Pop();
-
-                            if (rightDivide is ConstantExpression constant &&
-                                (double)constant!.Value! == 0)
-                            {
-                                return Expression.Throw(Expression.Constant
-                                    (new DivideByZeroException(DivisionByZero)));
-                            }
-
-                            //If right part is BinaryExpression then we can check whether it's = 0 only by compiling and running it
-                            else if (rightDivide is BinaryExpression binary)
-                            {
-                                var expr = Expression.Lambda<Func<double>>(binary);
-                                if (expr.Compile().Invoke() == 0)
-                                    return Expression.Throw(Expression.Constant
-                                        (new DivideByZeroException(DivisionByZero)));
-                            }
-
-                            expression = Expression.Divide(leftDivide, rightDivide);
-                            break;
-
-                        default:
-                            throw new Exception("Unexisting operator");
-                    };
-
-                    exprStack.Push(expression);
-                }
-            }
-
-            return exprStack.Pop();
-        }
-
-        private static void HandleUnaryMinuses(string[] tokens)
+        private static void ReplaceSingleWithUnaryMinuses(string[] tokens)
         {
             for (int i = 0; i < tokens.Length; i++)
             {
