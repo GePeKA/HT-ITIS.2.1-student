@@ -1,3 +1,4 @@
+using Hw9.Services.ExpressionCalculator;
 using Hw9.Services.ExpressionParser;
 using Hw9.Services.MathCalculator;
 
@@ -13,7 +14,13 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddExpressionParser(this IServiceCollection services) 
     { 
-        return services.
-            AddTransient<IExpressionParserService, ExpressionParserService>();
+        return services
+            .AddTransient<IExpressionParserService, ExpressionParserService>();
+    }
+
+    public static IServiceCollection AddExpressionCalculator(this IServiceCollection services) 
+    { 
+        return services
+            .AddTransient<IExpressionCalculator, ExpressionCalculator>();
     }
 }
