@@ -1,5 +1,6 @@
 ﻿using Hw10.DbModels;
 using Hw10.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hw10.Services.CachedCalculator;
 
@@ -16,7 +17,7 @@ public class MathCachedCalculatorService : IMathCalculatorService
 
 	public async Task<CalculationMathExpressionResultDto> CalculateMathExpressionAsync(string? expression)
 	{
-		var cachedExpression = _dbContext.SolvingExpressions.FirstOrDefault(x => x.Expression == expression);
+		var cachedExpression = await _dbContext.SolvingExpressions.FirstOrDefaultAsync(x => x.Expression == expression);
 
 		CalculationMathExpressionResultDto? result = null;
 
