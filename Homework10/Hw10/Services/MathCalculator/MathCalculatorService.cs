@@ -9,7 +9,7 @@ namespace Hw10.Services.MathCalculator;
 public class MathCalculatorService : IMathCalculatorService
 {
     public IExpressionParserService ExpressionParser { get; }
-    public IExpressionCalculatorService ExpressionCalculator { get; set; }
+    public IExpressionCalculatorService ExpressionCalculator { get; }
 
     public MathCalculatorService(IExpressionParserService expressionParserService,
         IExpressionCalculatorService expressionCalculator)
