@@ -1,4 +1,3 @@
-using Hw11.Dto;
 using Hw11.Services.ExpressionCalculator;
 using Hw11.Services.ExpressionParser;
 using System.Linq.Expressions;
@@ -8,8 +7,8 @@ namespace Hw11.Services.MathCalculator;
 
 public class MathCalculatorService : IMathCalculatorService
 {
-    public IExpressionParserService ExpressionParser { get; set; }
-    public IExpressionCalculatorService ExpressionCalculator { get; set; }
+    public IExpressionParserService ExpressionParser { get; }
+    public IExpressionCalculatorService ExpressionCalculator { get; }
 
     public MathCalculatorService(IExpressionParserService expressionParserService,
         IExpressionCalculatorService expressionCalculator)
