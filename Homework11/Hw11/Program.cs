@@ -7,6 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddMathCalculator();
+builder.Services.AddExpressionCalculator();
+builder.Services.AddExpressionParser();
+
 builder.Services.AddTransient<IExceptionHandler, ExceptionHandler>();
 
 var app = builder.Build();
