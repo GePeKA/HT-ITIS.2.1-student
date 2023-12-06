@@ -39,10 +39,10 @@ let webApp =
     
 type Startup() =
     member _.ConfigureServices (services : IServiceCollection) =
-        services.AddGiraffe() |> ignore
+        services.AddGiraffe().AddMiniProfiler() |> ignore
 
     member _.Configure (app : IApplicationBuilder) (_ : IHostEnvironment) (_ : ILoggerFactory) =
-        app.UseGiraffe webApp
+        app.UseMiniProfiler().UseGiraffe webApp
         
 [<EntryPoint>]
 let main _ =
