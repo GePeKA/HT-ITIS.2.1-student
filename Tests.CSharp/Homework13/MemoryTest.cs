@@ -6,13 +6,12 @@ using Xunit.Abstractions;
 
 namespace Tests.CSharp.Homework13;
 
-public class MemoryTest : IClassFixture<WebApplicationFactory<MemoryTest>>
-    // TODO: replace MemoryTest with the right generic argument
+public class MemoryTest : IClassFixture<WebApplicationFactory<Hw13.Calculator.Program>>
 {
     private readonly HttpClient _client;
     private readonly ITestOutputHelper _output;
 
-    public MemoryTest(WebApplicationFactory<MemoryTest> factory, ITestOutputHelper output)
+    public MemoryTest(WebApplicationFactory<Hw13.Calculator.Program> factory, ITestOutputHelper output)
     {
         _output = output;
         DotMemoryUnitTestOutput.SetOutputMethod(_output.WriteLine);
@@ -27,7 +26,7 @@ public class MemoryTest : IClassFixture<WebApplicationFactory<MemoryTest>>
         var testDataGenerator = new TestDataGenerator();
         var list = testDataGenerator.GetValue();
         long size = 0;
-        for (var i = 0; i < 100; i++)
+        for (var i = 0; i < 10000; i++)
             foreach (var element in list)
             {
                 var postRequest = new HttpRequestMessage(HttpMethod.Post, "/Calculator/CalculateMathExpression");
