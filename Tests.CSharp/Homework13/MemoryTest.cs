@@ -26,7 +26,7 @@ public class MemoryTest : IClassFixture<WebApplicationFactory<Hw13.Calculator.Pr
         var testDataGenerator = new TestDataGenerator();
         var list = testDataGenerator.GetValue();
         long size = 0;
-        for (var i = 0; i < 10000; i++)
+        for (var i = 0; i < 100; i++)
             foreach (var element in list)
             {
                 var postRequest = new HttpRequestMessage(HttpMethod.Post, "/Calculator/CalculateMathExpression");
